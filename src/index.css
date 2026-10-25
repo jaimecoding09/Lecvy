@@ -1,0 +1,573 @@
+/* ==========================================================================
+   Lecvy design system — Authentication (Iteration 1)
+   Palette: Primary Blue #2878F0 · White #FFFFFF · Dark Navy #17243A ·
+            Light Background #F2F6FC
+   Light mode only.
+   ========================================================================== */
+
+:root {
+  /* Brand palette (exact) */
+  --lec-blue: #2878f0;
+  --lec-white: #ffffff;
+  --lec-navy: #17243a;
+  --lec-bg: #f2f6fc;
+
+  /* Interaction and surface tints derived from the palette */
+  --lec-blue-hover: #1e63d8;
+  --lec-blue-press: #1a58c2;
+  --lec-border: #e1e9f6;
+  --lec-border-strong: #cbd8ee;
+  --lec-navy-70: rgba(23, 36, 58, 0.7);
+  --lec-navy-55: rgba(23, 36, 58, 0.55);
+  --lec-navy-40: rgba(23, 36, 58, 0.4);
+
+  /* Functional color — used only to signal error states */
+  --lec-error: #d92d20;
+  --lec-error-strong: #b42318;
+
+  /* Shape */
+  --lec-radius-sm: 8px;
+  --lec-radius-md: 12px;
+  --lec-radius-lg: 16px;
+
+  /* Depth */
+  --lec-shadow-sm: 0 1px 2px rgba(23, 36, 58, 0.06);
+  --lec-shadow-btn: 0 1px 2px rgba(40, 120, 240, 0.32);
+
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--lec-bg);
+  color: var(--lec-navy);
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
+    sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+a {
+  color: var(--lec-blue);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  font-family: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--lec-blue);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Auth shell — shared by every authentication screen
+   -------------------------------------------------------------------------- */
+
+.auth-page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.auth {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+.auth__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.auth__header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.auth__header--centered {
+  align-items: center;
+  text-align: center;
+}
+
+.auth__title {
+  margin: 0;
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--lec-navy);
+}
+
+.auth__subtitle {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--lec-navy-55);
+}
+
+.auth__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.auth__footer {
+  text-align: center;
+  font-size: 14px;
+  color: var(--lec-navy-55);
+}
+
+.auth__footer a {
+  font-weight: 600;
+}
+
+.auth__footer--split {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* --------------------------------------------------------------------------
+   Form fields
+   -------------------------------------------------------------------------- */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.field__label {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--lec-navy);
+}
+
+.field__control {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input {
+  width: 100%;
+  height: 50px;
+  padding: 0 16px;
+  font-size: 16px;
+  font-family: inherit;
+  color: var(--lec-navy);
+  background: var(--lec-white);
+  border: 1px solid var(--lec-border-strong);
+  border-radius: var(--lec-radius-md);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.input::placeholder {
+  color: var(--lec-navy-40);
+}
+
+.input:hover:not(:disabled) {
+  border-color: var(--lec-blue);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--lec-blue);
+  box-shadow: 0 0 0 3px rgba(40, 120, 240, 0.16);
+}
+
+.input:disabled {
+  background: var(--lec-bg);
+  color: var(--lec-navy-55);
+  cursor: not-allowed;
+}
+
+.input--trailing {
+  padding-right: 52px;
+}
+
+.input--error {
+  border-color: var(--lec-error);
+}
+
+.input--error:focus {
+  box-shadow: 0 0 0 3px rgba(217, 45, 32, 0.14);
+}
+
+.input-prefix {
+  position: absolute;
+  left: 16px;
+  font-size: 16px;
+  color: var(--lec-navy-55);
+  pointer-events: none;
+}
+
+.input--prefixed {
+  padding-left: 32px;
+}
+
+.field__toggle {
+  position: absolute;
+  right: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: var(--lec-radius-sm);
+  background: transparent;
+  color: var(--lec-navy-55);
+  cursor: pointer;
+}
+
+.field__toggle:hover {
+  color: var(--lec-blue);
+}
+
+.field__message {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.field__message--error {
+  color: var(--lec-error);
+}
+
+.field__message--hint {
+  color: var(--lec-navy-55);
+}
+
+.field__message svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.field__row {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* --------------------------------------------------------------------------
+   Buttons
+   -------------------------------------------------------------------------- */
+
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 50px;
+  padding: 0 18px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  border: 1px solid transparent;
+  border-radius: var(--lec-radius-md);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.05s ease;
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.btn--primary {
+  background: var(--lec-blue);
+  color: var(--lec-white);
+  box-shadow: var(--lec-shadow-btn);
+}
+
+.btn--primary:hover:not(:disabled) {
+  background: var(--lec-blue-hover);
+}
+
+.btn--primary:active:not(:disabled) {
+  background: var(--lec-blue-press);
+}
+
+.btn--social {
+  background: var(--lec-white);
+  color: var(--lec-navy);
+  border-color: var(--lec-border-strong);
+  box-shadow: var(--lec-shadow-sm);
+}
+
+.btn--social:hover:not(:disabled) {
+  border-color: var(--lec-blue);
+}
+
+.btn__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+.btn--text {
+  width: auto;
+  height: auto;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--lec-blue);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.btn--text:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: lec-spin 0.7s linear infinite;
+}
+
+@keyframes lec-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 1.6s;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Divider, notices, footer meta
+   -------------------------------------------------------------------------- */
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--lec-navy-40);
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--lec-border-strong);
+}
+
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  font-size: 14px;
+  line-height: 1.45;
+  border: 1px solid;
+  border-radius: var(--lec-radius-md);
+}
+
+.notice svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.notice--error {
+  background: var(--lec-white);
+  border-color: rgba(217, 45, 32, 0.35);
+  color: var(--lec-error-strong);
+}
+
+.notice--info {
+  background: var(--lec-white);
+  border-color: var(--lec-border-strong);
+  color: var(--lec-navy);
+  box-shadow: var(--lec-shadow-sm);
+}
+
+.notice--success {
+  background: var(--lec-bg);
+  border-color: var(--lec-border-strong);
+  color: var(--lec-navy);
+}
+
+.notice--success strong {
+  color: var(--lec-blue);
+}
+
+.notice__title {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   Brand mark (temporary placeholder artwork)
+   -------------------------------------------------------------------------- */
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  user-select: none;
+}
+
+.brand__mark {
+  display: inline-flex;
+}
+
+.brand__word {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--lec-navy);
+}
+
+.brand--lg .brand__word {
+  font-size: 28px;
+}
+
+/* --------------------------------------------------------------------------
+   Account (signed-in) screen — session placeholder for this iteration
+   -------------------------------------------------------------------------- */
+
+.account {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.account__card {
+  background: var(--lec-white);
+  border: 1px solid var(--lec-border);
+  border-radius: var(--lec-radius-lg);
+  box-shadow: var(--lec-shadow-sm);
+  overflow: hidden;
+}
+
+.account__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 18px;
+  font-size: 14px;
+  border-bottom: 1px solid var(--lec-border);
+}
+
+.account__row:last-child {
+  border-bottom: none;
+}
+
+.account__label {
+  color: var(--lec-navy-55);
+}
+
+.account__value {
+  font-weight: 600;
+  text-align: right;
+  word-break: break-all;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 999px;
+  background: var(--lec-bg);
+  border: 1px solid var(--lec-border-strong);
+  color: var(--lec-navy);
+}
+
+.pill--ok {
+  background: rgba(40, 120, 240, 0.1);
+  border-color: rgba(40, 120, 240, 0.35);
+  color: var(--lec-blue);
+}
