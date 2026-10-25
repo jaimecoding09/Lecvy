@@ -106,7 +106,7 @@ describe('VerifyEmailPage', () => {
     expect(navigateMock).not.toHaveBeenCalled()
   })
 
-  it('routes to the account screen once verification succeeds', async () => {
+  it('routes into onboarding once verification succeeds', async () => {
     const user = userEvent.setup()
     refreshMock.mockResolvedValue({ status: 'success', user: null, verified: true })
     renderScreen(<VerifyEmailPage />)
@@ -114,7 +114,7 @@ describe('VerifyEmailPage', () => {
     await user.click(screen.getByRole('button', { name: 'I’ve verified — continue' }))
 
     await waitFor(() =>
-      expect(navigateMock).toHaveBeenCalledWith('/account', { replace: true }),
+      expect(navigateMock).toHaveBeenCalledWith('/onboarding', { replace: true }),
     )
   })
 

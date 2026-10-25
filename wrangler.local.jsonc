@@ -1,0 +1,31 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "lecvy-local",
+  "main": "worker-build/index.js",
+  "compatibility_date": "2026-10-25",
+  "compatibility_flags": [],
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "lecvy-local",
+      "database_id": "00000000-0000-0000-0000-000000000000"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "FILES",
+      "bucket_name": "lecvy-local"
+    }
+  ],
+  "vars": {
+    "DEV_AUTH_BYPASS": "1"
+  },
+  "observability": {
+    "enabled": false
+  }
+}

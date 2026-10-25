@@ -20,7 +20,7 @@ type TextFieldProps = {
   label: string
   value: string
   onChange: (value: string) => void
-  type?: 'text' | 'email' | 'password'
+  type?: 'text' | 'email' | 'password' | 'date'
   placeholder?: string
   autoComplete?: string
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters'
@@ -31,6 +31,8 @@ type TextFieldProps = {
   disabled?: boolean
   passwordToggle?: boolean
   required?: boolean
+  min?: string
+  max?: string
   onBlur?: () => void
 }
 
@@ -49,6 +51,8 @@ export function TextField({
   disabled,
   passwordToggle,
   required,
+  min,
+  max,
   onBlur,
 }: TextFieldProps) {
   const id = useId()
@@ -95,6 +99,8 @@ export function TextField({
           spellCheck={spellCheck}
           disabled={disabled}
           required={required}
+          min={min}
+          max={max}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
         />

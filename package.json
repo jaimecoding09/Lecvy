@@ -5,9 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && npm run build:worker",
+    "build:worker": "esbuild worker/index.ts --bundle --format=esm --target=es2022 --outfile=worker-build/index.js",
+    "typecheck:worker": "tsc -p tsconfig.worker.json",
     "lint": "oxlint",
     "test": "vitest run",
+    "dev:worker": "npm run build && wrangler dev --config wrangler.local.jsonc --port 8787",
+    "dev:api": "npm run build:worker && wrangler dev --config wrangler.local.jsonc --port 8787",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -17,6 +21,7 @@
     "react-router-dom": "^7.18.4"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261025.1",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.8",
@@ -28,6 +33,7 @@
     "oxlint": "^1.88.0",
     "typescript": "~6.0.3",
     "vite": "^8.3.4",
-    "vitest": "^5.0.5"
+    "vitest": "^5.0.5",
+    "wrangler": "^4.152.0"
   }
 }

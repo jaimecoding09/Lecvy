@@ -6,6 +6,7 @@ import { renderScreen } from '../test/harness'
 import LoginPage from './LoginPage'
 import { signInWithEmail, signInWithGoogle } from '../lib/auth'
 import type { AuthOutcome } from '../lib/auth'
+import { getMe } from '../lib/api'
 
 const navigateMock = vi.hoisted(() => vi.fn())
 
@@ -20,11 +21,39 @@ vi.mock('../lib/auth', () => ({
   signInWithApple: vi.fn(),
 }))
 
+vi.mock('../lib/api', () => ({
+  getMe: vi.fn(),
+}))
+
 const signInMock = vi.mocked(signInWithEmail)
 const googleMock = vi.mocked(signInWithGoogle)
+const meMock = vi.mocked(getMe)
+
+function completedProfile(completed: boolean) {
+  return {
+    ok: true as const,
+    data: {
+      profile: {
+        uid: 'u1',
+        email: 'ada@example.com',
+        displayName: 'Ada',
+        username: 'ada',
+        avatarUrl: null,
+        dateOfBirth: '1998-01-01',
+        onboardingCompleted: completed,
+      },
+      onboarding: {
+        nextStep: completed ? ('complete' as const) : ('name' as const),
+        completedSteps: [],
+        canComplete: completed,
+      },
+    },
+  }
+}
 
 beforeEach(() => {
   vi.clearAllMocks()
+  meMock.mockResolvedValue(completedProfile(true))
 })
 
 describe('LoginPage', () => {
@@ -85,7 +114,7 @@ describe('LoginPage', () => {
     expect(navigateMock).not.toHaveBeenCalled()
   })
 
-  it('submits valid credentials and routes to the account screen', async () => {
+  it('submits valid credentials and routes an onboarded user home', async () => {
     const user = userEvent.setup()
     signInMock.mockResolvedValue({
       status: 'success',
@@ -101,7 +130,26 @@ describe('LoginPage', () => {
     await waitFor(() =>
       expect(signInMock).toHaveBeenCalledWith('ada@example.com', 'secret123'),
     )
-    expect(navigateMock).toHaveBeenCalledWith('/account', { replace: true })
+    await waitFor(() => expect(navigateMock).toHaveBeenCalledWith('/home', { replace: true }))
+  })
+
+  it('routes a user with incomplete onboarding into the wizard', async () => {
+    const user = userEvent.setup()
+    meMock.mockResolvedValue(completedProfile(false))
+    signInMock.mockResolvedValue({
+      status: 'success',
+      user: { uid: 'u1' } as never,
+      verified: true,
+    })
+    renderScreen(<LoginPage />)
+
+    await user.type(screen.getByLabelText(/email address/i), 'ada@example.com')
+    await user.type(screen.getByLabelText(/^password/i), 'secret123')
+    await user.click(screen.getByRole('button', { name: 'Log in' }))
+
+    await waitFor(() =>
+      expect(navigateMock).toHaveBeenCalledWith('/onboarding', { replace: true }),
+    )
   })
 
   it('routes an unverified account to the verification screen', async () => {

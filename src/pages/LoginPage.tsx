@@ -15,6 +15,7 @@ import {
   signInWithGoogle,
   type AuthOutcome,
 } from '../lib/auth'
+import { getMe } from '../lib/api'
 import { validateEmail } from '../lib/validation'
 
 type Banner = { kind: 'error' | 'info'; text: string } | null
@@ -30,9 +31,20 @@ export default function LoginPage() {
   const [banner, setBanner] = useState<Banner>(null)
   const [busy, setBusy] = useState<Busy>(null)
 
-  function finish(outcome: AuthOutcome) {
+  /** Sends the user to onboarding or straight home, based on D1 state. */
+  async function destinationAfterSignIn(): Promise<string> {
+    const result = await getMe()
+    if (result.ok) return result.data.profile.onboardingCompleted ? '/home' : '/onboarding'
+    return '/onboarding'
+  }
+
+  async function finish(outcome: AuthOutcome) {
     if (outcome.status === 'success') {
-      navigate(outcome.verified ? '/account' : '/verify-email', { replace: true })
+      if (!outcome.verified) {
+        navigate('/verify-email', { replace: true })
+        return
+      }
+      navigate(await destinationAfterSignIn(), { replace: true })
       return
     }
     if (outcome.status === 'cancelled') {
@@ -55,7 +67,7 @@ export default function LoginPage() {
     setBusy('form')
     const outcome = await signInWithEmail(email.trim(), password)
     setBusy(null)
-    finish(outcome)
+    await finish(outcome)
   }
 
   async function handleSocial(provider: 'google' | 'apple') {
@@ -63,7 +75,7 @@ export default function LoginPage() {
     setBusy(provider)
     const outcome = provider === 'google' ? await signInWithGoogle() : await signInWithApple()
     setBusy(null)
-    finish(outcome)
+    await finish(outcome)
   }
 
   return (

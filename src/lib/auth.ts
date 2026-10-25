@@ -9,17 +9,12 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
-  updateProfile,
   type Auth,
   type User,
 } from 'firebase/auth'
 
 import { getFirebaseAuth, isFirebaseConfigured } from './firebase'
-import {
-  validateDisplayName,
-  validateEmail,
-  validateNewPassword,
-} from './validation'
+import { validateEmail, validateNewPassword } from './validation'
 
 /**
  * Every auth function resolves to one of three outcomes so screens can render
@@ -127,25 +122,22 @@ export function subscribeToAuth(
 }
 
 export async function signUpWithEmail(input: {
-  displayName: string
-  username: string
   email: string
   password: string
 }): Promise<AuthOutcome> {
   return run(async () => {
-    const name = validateDisplayName(input.displayName)
-    if (!name.ok) return { status: 'error', message: name.message }
     const email = validateEmail(input.email)
     if (!email.ok) return { status: 'error', message: email.message }
     const password = validateNewPassword(input.password)
     if (!password.ok) return { status: 'error', message: password.message }
 
+    // Profile details (name, username, date of birth) are collected by the
+    // onboarding wizard and stored in D1, not in the Firebase profile.
     const credential = await createUserWithEmailAndPassword(
       auth(),
       email.value,
       password.value,
     )
-    await updateProfile(credential.user, { displayName: name.value })
     await sendEmailVerification(credential.user)
     return {
       status: 'success',

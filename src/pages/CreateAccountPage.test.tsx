@@ -5,7 +5,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { renderScreen } from '../test/harness'
 import CreateAccountPage from './CreateAccountPage'
 import { signUpWithEmail } from '../lib/auth'
-import { readUsernameLocally } from '../lib/profile'
 
 const navigateMock = vi.hoisted(() => vi.fn())
 
@@ -22,85 +21,46 @@ const signUpMock = vi.mocked(signUpWithEmail)
 
 beforeEach(() => {
   vi.clearAllMocks()
-  localStorage.clear()
 })
 
-async function fillValidForm(user: ReturnType<typeof userEvent.setup>) {
-  await user.type(screen.getByLabelText(/display name/i), 'Ada Lovelace')
-  await user.type(screen.getByLabelText(/username/i), 'Ada.Lovelace')
-  await user.type(screen.getByLabelText(/email address/i), 'ada@example.com')
-  await user.type(screen.getByLabelText(/^password/i), 'secret123')
-}
-
 describe('CreateAccountPage', () => {
-  it('shows the specified fields and links', () => {
+  it('asks only for email and password', () => {
     renderScreen(<CreateAccountPage />)
 
-    expect(
-      screen.getByRole('heading', { name: 'Create your account' }),
-    ).toBeInTheDocument()
-    expect(screen.getByLabelText(/display name/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/username/i)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Create your account' })).toBeInTheDocument()
     expect(screen.getByLabelText(/email address/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/^password/i)).toBeInTheDocument()
-    expect(
-      screen.getByRole('button', { name: 'Create account' }),
-    ).toBeInTheDocument()
+    expect(screen.queryByLabelText(/display name/i)).toBeNull()
+    expect(screen.queryByLabelText(/username/i)).toBeNull()
+    expect(screen.getByRole('button', { name: 'Create account' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Log in' })).toBeInTheDocument()
-    expect(screen.getByText('Lecvy')).toBeInTheDocument()
   })
 
-  it('rejects a username containing spaces', async () => {
+  it('reports invalid fields without calling Firebase', async () => {
     const user = userEvent.setup()
     renderScreen(<CreateAccountPage />)
 
-    await fillValidForm(user)
-    await user.clear(screen.getByLabelText(/username/i))
-    await user.type(screen.getByLabelText(/username/i), 'ada lovelace')
+    await user.type(screen.getByLabelText(/email address/i), 'nope')
     await user.click(screen.getByRole('button', { name: 'Create account' }))
 
-    expect(
-      await screen.findByText('Usernames cannot contain spaces.'),
-    ).toBeInTheDocument()
-    expect(signUpMock).not.toHaveBeenCalled()
-    expect(navigateMock).not.toHaveBeenCalled()
-  })
-
-  it('reports every invalid field at once', async () => {
-    const user = userEvent.setup()
-    renderScreen(<CreateAccountPage />)
-
-    await user.click(screen.getByRole('button', { name: 'Create account' }))
-
-    expect(await screen.findByText('Enter a display name.')).toBeInTheDocument()
-    expect(screen.getByText('Choose a username.')).toBeInTheDocument()
-    expect(screen.getByText('Enter your email address.')).toBeInTheDocument()
+    expect(await screen.findByText('Enter a valid email address.')).toBeInTheDocument()
     expect(screen.getByText('Choose a password.')).toBeInTheDocument()
     expect(signUpMock).not.toHaveBeenCalled()
   })
 
-  it('creates the account with a normalised username and routes to verification', async () => {
+  it('creates the Firebase account then routes to email verification', async () => {
     const user = userEvent.setup()
-    signUpMock.mockResolvedValue({
-      status: 'success',
-      user: { uid: 'u1' } as never,
-      verified: false,
-    })
+    signUpMock.mockResolvedValue({ status: 'success', user: { uid: 'u1' } as never, verified: false })
     renderScreen(<CreateAccountPage />)
 
-    await fillValidForm(user)
+    await user.type(screen.getByLabelText(/email address/i), 'ada@example.com')
+    await user.type(screen.getByLabelText(/^password/i), 'secret123')
     await user.click(screen.getByRole('button', { name: 'Create account' }))
 
     await waitFor(() =>
-      expect(signUpMock).toHaveBeenCalledWith({
-        displayName: 'Ada Lovelace',
-        username: 'ada.lovelace',
-        email: 'ada@example.com',
-        password: 'secret123',
-      }),
+      expect(signUpMock).toHaveBeenCalledWith({ email: 'ada@example.com', password: 'secret123' }),
     )
     expect(navigateMock).toHaveBeenCalledWith('/verify-email', { replace: true })
-    await waitFor(() => expect(readUsernameLocally('u1')).toBe('ada.lovelace'))
   })
 
   it('surfaces an existing account with a route back to login', async () => {
@@ -112,14 +72,13 @@ describe('CreateAccountPage', () => {
     })
     renderScreen(<CreateAccountPage />)
 
-    await fillValidForm(user)
+    await user.type(screen.getByLabelText(/email address/i), 'ada@example.com')
+    await user.type(screen.getByLabelText(/^password/i), 'secret123')
     await user.click(screen.getByRole('button', { name: 'Create account' }))
 
     const alert = await screen.findByRole('alert')
     expect(alert).toHaveTextContent('An account with this email already exists.')
-    expect(
-      within(alert).getByRole('link', { name: 'Log in' }),
-    ).toBeInTheDocument()
+    expect(within(alert).getByRole('link', { name: 'Log in' })).toBeInTheDocument()
     expect(navigateMock).not.toHaveBeenCalled()
   })
 })

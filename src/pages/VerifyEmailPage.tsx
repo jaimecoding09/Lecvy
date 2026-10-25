@@ -43,7 +43,7 @@ export default function VerifyEmailPage() {
   }
 
   if (!user) return <Navigate to="/login" replace />
-  if (user.emailVerified) return <Navigate to="/account" replace />
+  if (user.emailVerified) return <Navigate to="/onboarding" replace />
 
   async function handleResend() {
     setNote(null)
@@ -64,7 +64,7 @@ export default function VerifyEmailPage() {
     const outcome = await refreshCurrentUser()
     setChecking(false)
     if (outcome.status === 'success' && outcome.verified) {
-      navigate('/account', { replace: true })
+      navigate('/onboarding', { replace: true })
       return
     }
     setNote({
